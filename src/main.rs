@@ -4,13 +4,19 @@ use std::fs;
 fn main()
 {
     let args: Vec<String> = env::args().collect();
-    let (query, filename) = parse_config(&args);
+    let config = parse_config(&args);
 
-    println!("Searching for {}", query);
-    println!("In file {}", filename);
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.filename);
 
-    let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
+    let contents = fs::read_to_string(config.filename).expect("Something went wrong reading the file");
     println!("With text:\n{}", contents);
+}
+
+struct Config<'a>
+{
+    query: &'a str, //or we could use String, and avoid references and lifetimes (<'a>)
+    filename: &'a str, //String,
 }
 
 // https://stackoverflow.com/questions/30794235/what-is-the-difference-between-a-slice-and-an-array
@@ -21,10 +27,10 @@ fn main()
 // &[T],   called a slice, is a sized type.
 //         It's a fat pointer, represented as a pointer to the first item and the length of the slice.
 // Arrays thus have their length known at compile time while slice lengths are a runtime matter.
-fn parse_config(args: &[String]) -> (&str, &str)
+fn parse_config(args: &[String]) -> Config
 {
-    let query = &args[1];
-    let filename = &args[2];
+    let query = args[1].as_str(); //args[1].clone(); to get a copy of this String
+    let filename = args[2].as_str(); //args[2].clone(); to get a copy of this String
 
-    (query, filename)
+    Config { query, filename }
 }
