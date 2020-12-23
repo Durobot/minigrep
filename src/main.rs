@@ -31,6 +31,9 @@ impl<'a> Config<'a>
     // Arrays thus have their length known at compile time while slice lengths are a runtime matter.
     fn new(args: &[String]) -> Config
     {
+        if args.len() < 3
+        { panic!("Not enough command line arguments!"); }
+
         let query = args[1].as_str(); //args[1].clone(); to get a copy of this String
         let filename = args[2].as_str(); //args[2].clone(); to get a copy of this String
 
