@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::process;
+use std::error::Error;
 
 fn main()
 {
@@ -14,7 +15,15 @@ fn main()
     println!("Searching for {}", config.query);
     println!("In file {}", config.filename);
 
-    run(config);
+    // If run() returns Result::Err, get its value and
+    // assign it to e, then execute the {} block
+    if let Err(e) = run(config)
+    {
+        println!("Application error: {}", e);
+        process::exit(1);
+    }
+    // Since run() returns () within Result::Ok, we don't
+    // have to get Ok's value
 }
 
 struct Config<'a>
@@ -45,8 +54,17 @@ impl<'a> Config<'a>
     }
 }
 
-fn run(config: Config)
+// trait object Box<dyn Error> means the function will return a type that implements the Error trait,
+// but we don’t have to specify what particular type the return value will be
+fn run(config: Config) -> Result<(), Box<dyn Error>> // () if Ok, see below
 {
-    let contents = fs::read_to_string(config.filename).expect("Something went wrong reading the file");
+    // Rather than panic! on an error, the ? operator
+    // will return the error value from the current function for the caller to handle,
+    // should fs::read_to_string() return Result::Err
+    let contents = fs::read_to_string(config.filename)?;
     println!("With text:\n{}", contents);
+
+    // Using () in Result::Ok variant means we don't really
+    // want to return any value if everything's good
+    Ok(())
 }
