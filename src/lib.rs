@@ -40,7 +40,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> // () if Ok, see below
     // will return the error value from the current function for the caller to handle,
     // should fs::read_to_string() return Result::Err
     let contents = fs::read_to_string(config.filename)?;
-    println!("With text:\n{}", contents);
+    for line in search(&config.query, &contents)
+    { println!("{}", line); }
 
     // Using () in Result::Ok variant means we don't really
     // want to return any value if everything's good

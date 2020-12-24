@@ -13,9 +13,6 @@ fn main()
         process::exit(1);
     });
 
-    println!("Searching for {}", config.query);
-    println!("In file {}", config.filename);
-
     // If run() returns Result::Err, get its value and
     // assign it to e, then execute the {} block
     if let Err(e) = minigrep::run(config) // don't have to bring fns from the lib crate into scope
