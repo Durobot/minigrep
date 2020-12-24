@@ -46,3 +46,38 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> // () if Ok, see below
     // want to return any value if everything's good
     Ok(())
 }
+
+// Returned vector contains string slices that reference file contents,
+// i.e. they can live as long as contents (rather than as long as query).
+// None of the 3 rules of function parameters' lifetimes cover this case
+// (2 reference parameters, 1 reference return value), so we must specify
+// return value's lifetime explicitly.
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str>
+{
+    let mut results = Vec::new();
+    for line in contents.lines()
+    {
+        if line.contains(query)
+        { results.push(line); }
+    }
+
+    results
+}
+
+#[cfg(test)]
+mod tests
+{
+    use super::*;
+
+    #[test]
+    fn one_result()
+    {
+        let query = "duct";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.";
+
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+}
