@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fs;
+use std::env;
 
 // Note the use of "pub".
 // This library crate has a public API that can be tested.
@@ -8,6 +9,7 @@ pub struct Config<'a>
 {
     pub query: &'a str, //or we could use String, and avoid references and lifetimes (<'a>)
     pub filename: &'a str, //String,
+    pub case_sensitive: bool,
 }
 
 impl<'a> Config<'a>
@@ -27,8 +29,16 @@ impl<'a> Config<'a>
 
         let query = args[1].as_str(); //args[1].clone(); to get a copy of this String
         let filename = args[2].as_str(); //args[2].clone(); to get a copy of this String
+        // fn env::var() returns a Result that will be the successful Ok
+        // variant that contains the value of the environment variable
+        // if the environment variable is set, or the Err variant if
+        // the environment variable is not set.
+        // Result::is_err() method returns true if this Result is set to Err,
+        // thus case_sensitive will be true if CASE_INSENSITIVE environment
+        // variable is NOT set.
+        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
 
-        Ok(Config { query, filename })
+        Ok(Config { query, filename, case_sensitive })
     }
 }
 
@@ -40,7 +50,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> // () if Ok, see below
     // will return the error value from the current function for the caller to handle,
     // should fs::read_to_string() return Result::Err
     let contents = fs::read_to_string(config.filename)?;
-    for line in search(&config.query, &contents)
+
+    let results = if config.case_sensitive
+    { search(&config.query, &contents) }
+    else
+    { search_case_insensitive(&config.query, &contents) };
+
+    for line in results
     { println!("{}", line); }
 
     // Using () in Result::Ok variant means we don't really
