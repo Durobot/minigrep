@@ -65,20 +65,51 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str>
     results
 }
 
+pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str>
+{
+    // (1) to_lowercase() returns String, calling to_lowercase() creates new data
+    // (2) query on the left is a new variable that is going to shadow old query
+    let query = query.to_lowercase();
+    let mut results = Vec::new();
+    for line in contents.lines()
+    {
+        // Ampersans is necessary because the signature of contains()
+        // is defined to take a string slice
+        if line.to_lowercase().contains(&query)
+        { results.push(line); }
+    }
+
+    results
+}
+
 #[cfg(test)]
 mod tests
 {
     use super::*;
 
     #[test]
-    fn one_result()
+    fn case_sensitive()
     {
         let query = "duct";
         let contents = "\
 Rust:
 safe, fast, productive.
-Pick three.";
+Pick three.
+Duct tape."; // "duct" != "Duct"
 
         assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
+
+    #[test]
+    fn case_insensitive()
+    {
+        let query = "rUsT";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Trust me."; // "rUsT" is in "Rust:" AND "Trust me."
+
+        assert_eq!(vec!["Rust:", "Trust me."], search_case_insensitive(query, contents));
     }
 }
