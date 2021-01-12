@@ -71,6 +71,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> // () if Ok, see below
 // return value's lifetime explicitly.
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str>
 {
+    /*
     let mut results = Vec::new();
     for line in contents.lines()
     {
@@ -79,6 +80,18 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str>
     }
 
     results
+
+    - Let's replace this code with the version that uses
+    - iterator adapters (adapters, Iterator methods that produce other,
+    - different iterators) - filter(),
+    - and consuming adaptors (consumers, Iterator methods that consume
+    - iterator by calling next() until it runs out of data and
+    - returns None) - collect().
+    */
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str>
